@@ -8,6 +8,9 @@
     },
     {
       "pattern": "./ghost/*/"
+    },
+    {
+      "pattern": "./koenig/*/"
     }
   ],
   "search.exclude": {
@@ -17,10 +20,14 @@
     "**/dist/**": true,
     "**/ghost.map": true,
     "**/node_modules": true,
-    "ghost/core/core/built/**": true
+    "ghost/core/core/built/**": true,
+    ".claude/worktrees/**": true,
+    "**/config.*.json": false,
+    "**/config.*.jsonc": false
   },
-  "tailwindCSS.experimental.classRegex": [
-    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ],
-  "git.detectSubmodules": false
+  "tailwindCSS.experimental.classRegex": [["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]],
+  "git.detectSubmodules": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  }
 }

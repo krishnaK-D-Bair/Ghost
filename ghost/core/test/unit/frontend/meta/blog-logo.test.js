@@ -1,40 +1,42 @@
-const should = require('should');
+const assert = require('node:assert/strict');
+const { assertExists } = require('../../../utils/assertions');
 const getBlogLogo = require('../../../../core/frontend/meta/blog-logo');
 const sinon = require('sinon');
 const settingsCache = require('../../../../core/shared/settings-cache');
+const config = require('../../../../core/shared/config');
 
 describe('getBlogLogo', function () {
-    afterEach(function () {
-        sinon.restore();
+  afterEach(function () {
+    sinon.restore();
+  });
+
+  it('should return logo if uploaded', function () {
+    let blogLogo;
+
+    sinon.stub(settingsCache, 'get').callsFake(function (key) {
+      return {
+        logo: '/content/images/logo.png',
+        icon: null,
+      }[key];
     });
 
-    it('should return logo if uploaded', function () {
-        let blogLogo;
+    blogLogo = getBlogLogo();
+    assertExists(blogLogo);
+    assert.equal(blogLogo.url, `${config.get('url')}/content/images/logo.png`);
+  });
 
-        sinon.stub(settingsCache, 'get').callsFake(function (key) {
-            return {
-                logo: '/content/images/logo.png',
-                icon: null
-            }[key];
-        });
+  it('should return custom uploaded png icon if no logo given', function () {
+    let blogLogo;
 
-        blogLogo = getBlogLogo();
-        should.exist(blogLogo);
-        blogLogo.should.have.property('url', 'http://127.0.0.1:2369/content/images/logo.png');
+    sinon.stub(settingsCache, 'get').callsFake(function (key) {
+      return {
+        logo: null,
+        icon: '/content/images/favicon.png',
+      }[key];
     });
 
-    it('should return custom uploaded png icon if no logo given', function () {
-        let blogLogo;
-
-        sinon.stub(settingsCache, 'get').callsFake(function (key) {
-            return {
-                logo: null,
-                icon: '/content/images/favicon.png'
-            }[key];
-        });
-
-        blogLogo = getBlogLogo();
-        should.exist(blogLogo);
-        blogLogo.should.have.property('url', 'http://127.0.0.1:2369/content/images/size/w256h256/favicon.png');
-    });
+    blogLogo = getBlogLogo();
+    assertExists(blogLogo);
+    assert.equal(blogLogo.url, `${config.get('url')}/content/images/size/w256h256/favicon.png`);
+  });
 });

@@ -1,170 +1,173 @@
-import Docker from 'dockerode';
 import baseDebug from '@tryghost/debug';
 import logging from '@tryghost/logging';
-import {DOCKER_COMPOSE_CONFIG, PORTAL, TINYBIRD} from './constants';
-import {DockerCompose} from './docker-compose';
-import {GhostInstance, GhostManager, MySQLManager, PortalManager, TinybirdManager} from './service-managers';
-import {randomUUID} from 'crypto';
+import { GhostInstance, MySQLManager } from './service-managers';
+import { GhostManager } from './service-managers/ghost-manager';
+import { randomUUID } from 'crypto';
+import type { EgressMonitor } from './service-managers/egress-monitor';
+import type { GhostConfig } from '@/helpers/playwright/fixture';
 
 const debug = baseDebug('e2e:EnvironmentManager');
 
 /**
- * Manages the lifecycle of Docker containers and shared services for end-to-end tests
+ * Environment modes for E2E testing.
  *
- * @usage
- * ```
- * const environmentManager = new EnvironmentManager();
- * await environmentManager.globalSetup(); // Call once before all tests to start MySQL, Tinybird, etc.
- * const ghostInstance = await environmentManager.perTestSetup(); // Call before each test to create an isolated Ghost instance
- * await environmentManager.perTestTeardown(ghostInstance); // Call after each test to clean up the Ghost instance
- * await environmentManager.globalTeardown(); // Call once after all tests to stop shared services
- * ````
+ * - dev: Uses dev infrastructure with hot-reloading dev servers
+ * - build: Uses pre-built image (local or registry, controlled by GHOST_E2E_IMAGE)
+ */
+export type EnvironmentMode = 'dev' | 'build';
+type GhostEnvOverrides = GhostConfig | Record<string, string>;
+
+/**
+ * Orchestrates e2e test environment.
+ *
+ * Supports two modes controlled by GHOST_E2E_MODE environment variable:
+ * - dev: Uses dev infrastructure with hot-reloading
+ * - build: Uses pre-built image (set GHOST_E2E_IMAGE for registry images)
+ *
+ * All modes use the same core infrastructure (MySQL, Redis, Mailpit) started
+ * via docker compose. Analytics/Tinybird services are optional. Ghost and
+ * gateway containers are created dynamically per-worker for test isolation.
  */
 export class EnvironmentManager {
-    private readonly dockerCompose: DockerCompose;
-    private readonly mysql: MySQLManager;
-    private readonly tinybird: TinybirdManager;
-    private readonly ghost: GhostManager;
-    private readonly portal: PortalManager;
+  private readonly mode: EnvironmentMode;
+  private readonly workerIndex: number;
+  private readonly mysql: MySQLManager;
+  private readonly ghost: GhostManager;
+  private initialized = false;
 
-    constructor(
-        composeFilePath: string = DOCKER_COMPOSE_CONFIG.FILE_PATH,
-        composeProjectName: string = DOCKER_COMPOSE_CONFIG.PROJECT
-    ) {
-        const docker = new Docker();
-        this.dockerCompose = new DockerCompose({
-            composeFilePath: composeFilePath,
-            projectName: composeProjectName,
-            docker: docker
-        });
+  constructor() {
+    this.mode = this.detectMode();
+    this.workerIndex = parseInt(process.env.TEST_PARALLEL_INDEX || '0', 10);
 
-        this.mysql = new MySQLManager(this.dockerCompose);
-        this.tinybird = new TinybirdManager(this.dockerCompose, TINYBIRD.CONFIG_DIR, TINYBIRD.CLI_ENV_PATH);
-        this.ghost = new GhostManager(docker, this.dockerCompose, this.tinybird);
-        this.portal = new PortalManager(this.dockerCompose, PORTAL.PORT);
+    this.mysql = new MySQLManager();
+    this.ghost = new GhostManager({
+      workerIndex: this.workerIndex,
+      mode: this.mode,
+    });
+  }
+
+  /**
+   * Detect environment mode from GHOST_E2E_MODE environment variable.
+   */
+  private detectMode(): EnvironmentMode {
+    const envMode = process.env.GHOST_E2E_MODE;
+    if (envMode === 'build' || envMode === 'dev') {
+      return envMode;
     }
 
-    /**
-     * Setup shared global environment for tests (i.e. mysql, tinybird, portal)
-     * This should be called once before all tests run.
-     *
-     * 1. Clean up any leftover resources from previous test runs
-     * 2. Start docker-compose services (including running Ghost migrations on the default database)
-     * 3. Wait for all services to be ready (healthy or exited with code 0)
-     * 4. Create a MySQL snapshot of the database after migrations, so we can quickly clone from it for each test without re-running migrations
-     * 5. Fetch Tinybird tokens from the tinybird-local service and store in /data/state/tinybird.json
-     *
-     * NOTE: Playwright workers run in their own processes, so each worker gets its own instance of EnvironmentManager.
-     * This is why we need to use a shared state file for Tinybird tokens - this.tinybird instance is not shared between workers.
-     */
-    public async globalSetup(): Promise<void> {
-        logging.info('Starting global environment setup...');
+    logging.warn(
+      'GHOST_E2E_MODE is not set; defaulting to build mode. Use the e2e shell entrypoints for automatic mode resolution.',
+    );
+    return 'build';
+  }
 
-        await this.cleanupResources();
-        await this.dockerCompose.up();
-        await this.mysql.createSnapshot();
-        this.tinybird.fetchAndSaveConfig();
+  /**
+   * Global setup - creates database snapshot for test isolation.
+   *
+   * Creates the worker 0 containers (Ghost + Gateway) and waits for Ghost to
+   * become healthy. Ghost automatically runs migrations on startup. Once healthy,
+   * we snapshot the database for test isolation.
+   */
+  async globalSetup(): Promise<void> {
+    logging.info(`Starting ${this.mode} environment global setup...`);
 
-        logging.info('Global environment setup complete');
+    await this.cleanupResources();
+
+    // Create base database
+    await this.mysql.recreateBaseDatabase('ghost_e2e_base');
+
+    // Create containers and wait for Ghost to be healthy (runs migrations)
+    await this.ghost.setup('ghost_e2e_base');
+    await this.ghost.waitForReady();
+    this.initialized = true;
+
+    // Snapshot the migrated database for test isolation
+    await this.mysql.createSnapshot('ghost_e2e_base');
+
+    logging.info(`${this.mode} environment global setup complete`);
+  }
+
+  /**
+   * Global teardown - cleanup resources.
+   */
+  async globalTeardown(): Promise<void> {
+    if (this.shouldPreserveEnvironment()) {
+      logging.info('PRESERVE_ENV is set - skipping teardown');
+      return;
     }
 
-    /**
-     * Setup that executes on each test start
-     */
-    public async perTestSetup(options: {config?: unknown} = {}): Promise<GhostInstance> {
-        try {
-            const {siteUuid, instanceId} = this.uniqueTestDetails();
-            await this.mysql.setupTestDatabase(instanceId, siteUuid);
-            const portalUrl = await this.portal.getUrl();
+    logging.info(`Starting ${this.mode} environment global teardown...`);
+    await this.cleanupResources();
+    logging.info(`${this.mode} environment global teardown complete`);
+  }
 
-            return await this.ghost.createAndStartInstance(instanceId, siteUuid, portalUrl, options.config);
-        } catch (error) {
-            logging.error('Failed to setup Ghost instance:', error);
-            throw new Error(`Failed to setup Ghost instance: ${error}`);
-        }
+  /**
+   * Per-test setup - creates containers on first call, then clones database and restarts Ghost.
+   */
+  async perTestSetup(
+    options: {
+      config?: GhostEnvOverrides;
+      stripe?: {
+        secretKey: string;
+        publishableKey: string;
+      };
+    } = {},
+  ): Promise<GhostInstance> {
+    // Lazy initialization of Ghost containers (once per worker)
+    if (!this.initialized) {
+      debug('Initializing Ghost containers for worker', this.workerIndex, 'in mode', this.mode);
+      await this.ghost.setup();
+      this.initialized = true;
     }
 
-    /**
-     * This should be called once after all tests have finished.
-     *
-     * 1. Remove all Ghost containers
-     * 2. Clean up test databases
-     * 3. Recreate the ghost_testing database for the next run
-     * 4. Truncate Tinybird analytics_events datasource
-     * 5. If PRESERVE_ENV=true is set, skip the teardown to allow manual inspection
-     */
-    public async globalTeardown(): Promise<void> {
-        if (this.shouldPreserveEnvironment()) {
-            logging.info('PRESERVE_ENV is set to true - skipping global environment teardown');
-            return;
-        }
+    const siteUuid = randomUUID();
+    const instanceId = `ghost_e2e_${siteUuid.replace(/-/g, '_')}`;
 
-        logging.info('Starting global environment teardown...');
+    // Setup database
+    await this.mysql.setupTestDatabase(instanceId, siteUuid, {
+      stripe: options.stripe,
+    });
 
-        await this.cleanupResources();
+    // Restart Ghost with new database
+    await this.ghost.restartWithDatabase(instanceId, options.config);
+    await this.ghost.waitForReady();
 
-        logging.info('Global environment teardown complete (docker compose services left running)');
-    }
+    const port = this.ghost.getGatewayPort();
 
-    /**
-     * Setup that executes on each test stop
-     */
-    public async perTestTeardown(ghostInstance: GhostInstance): Promise<void> {
-        try {
-            debug('Tearing down Ghost instance:', ghostInstance.containerId);
+    return {
+      containerId: this.ghost.ghostContainerId!,
+      instanceId,
+      database: instanceId,
+      port,
+      baseUrl: `http://localhost:${port}`,
+      siteUuid,
+    };
+  }
 
-            await this.ghost.stopAndRemoveInstance(ghostInstance.containerId);
-            await this.mysql.cleanupTestDatabase(ghostInstance.database);
+  /**
+   * Per-test teardown - drops test database.
+   */
+  async perTestTeardown(instance: GhostInstance): Promise<void> {
+    await this.mysql.cleanupTestDatabase(instance.database);
+  }
 
-            debug('Ghost instance teardown completed');
-        } catch (error) {
-            // Don't throw - we want tests to continue even if cleanup fails
-            logging.error('Failed to teardown Ghost instance:', error);
-        }
-    }
+  /**
+   * Egress monitor for this worker, or null when disabled / unavailable.
+   * Records external hostnames the Ghost container resolves.
+   */
+  getEgressMonitor(): EgressMonitor | null {
+    return this.ghost.getEgressMonitor();
+  }
 
-    /**
-     * Clean up leftover resources from previous test runs
-     * This should be called at the start of globalSetup to ensure a clean slate,
-     * especially after interrupted test runs (e.g. via ctrl+c)
-     *
-     * 1. Remove all leftover Ghost containers
-     * 2. Clean up leftover test databases (if MySQL is running)
-     * 3. Delete the MySQL snapshot (if MySQL is running)
-     * 4. Recreate the ghost_testing database (if MySQL is running)
-     * 5. Truncate Tinybird analytics_events datasource (if Tinybird is running)
-     *
-     * Note: Docker compose services are left running for reuse across test runs
-     */
-    private async cleanupResources(): Promise<void> {
-        try {
-            logging.info('Cleaning up leftover resources from previous test runs...');
+  private async cleanupResources(): Promise<void> {
+    logging.info('Cleaning up e2e resources...');
+    await this.ghost.cleanupAllContainers();
+    await this.mysql.dropAllTestDatabases();
+    await this.mysql.deleteSnapshot();
+    logging.info('E2E resources cleaned up');
+  }
 
-            await this.ghost.removeAll();
-            await this.mysql.dropAllTestDatabases();
-            await this.mysql.deleteSnapshot();
-            await this.mysql.recreateBaseDatabase();
-            this.tinybird.truncateAnalyticsEvents();
-
-            logging.info('Leftover resources cleaned up successfully');
-        } catch (error) {
-            // Don't throw - we want to continue with setup even if cleanup fails
-            logging.warn('Failed to clean up some leftover resources:', error);
-        }
-    }
-
-    private shouldPreserveEnvironment(): boolean {
-        return process.env.PRESERVE_ENV === 'true';
-    }
-
-    // each test is going to have unique Ghost container, and site uuid for analytic events
-    private uniqueTestDetails() {
-        const siteUuid = randomUUID();
-        const instanceId = `ghost_${siteUuid}`;
-
-        return {
-            siteUuid,
-            instanceId
-        };
-    }
+  private shouldPreserveEnvironment(): boolean {
+    return process.env.PRESERVE_ENV === 'true';
+  }
 }

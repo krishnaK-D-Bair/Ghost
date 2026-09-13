@@ -1,9 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`page.* events page.added event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -12,11 +13,12 @@ Object {
 
 exports[`page.* events page.added event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.added",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -26,6 +28,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -48,7 +51,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -75,7 +78,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -85,6 +88,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -107,7 +111,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -160,7 +164,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -171,8 +175,9 @@ Object {
 
 exports[`page.* events page.deleted event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -181,12 +186,13 @@ Object {
 
 exports[`page.* events page.deleted event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.deleted",
   "page": Object {
     "current": Object {},
     "previous": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -196,6 +202,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -227,7 +234,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -258,8 +265,9 @@ Object {
 
 exports[`page.* events page.edited event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -268,11 +276,12 @@ Object {
 
 exports[`page.* events page.edited event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.edited",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -282,6 +291,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -313,7 +323,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -346,7 +356,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -356,6 +366,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -387,7 +398,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -440,7 +451,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -493,8 +504,9 @@ Object {
 
 exports[`page.* events page.published event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -503,11 +515,12 @@ Object {
 
 exports[`page.* events page.published event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.published",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -517,6 +530,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -548,7 +562,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -581,7 +595,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -591,6 +605,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -622,7 +637,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -675,7 +690,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -728,8 +743,9 @@ Object {
 
 exports[`page.* events page.published.edited event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -738,11 +754,12 @@ Object {
 
 exports[`page.* events page.published.edited event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.published.edited",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -752,6 +769,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -783,7 +801,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -816,7 +834,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -826,6 +844,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -857,7 +876,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -910,7 +929,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -962,8 +981,9 @@ Object {
 
 exports[`page.* events page.rescheduled event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -972,11 +992,12 @@ Object {
 
 exports[`page.* events page.rescheduled event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.rescheduled",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -986,6 +1007,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1017,7 +1039,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -1050,7 +1072,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -1060,6 +1082,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1091,7 +1114,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -1144,7 +1167,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -1196,8 +1219,9 @@ Object {
 
 exports[`page.* events page.scheduled event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -1206,11 +1230,12 @@ Object {
 
 exports[`page.* events page.scheduled event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.scheduled",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -1220,6 +1245,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1251,7 +1277,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -1284,7 +1310,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -1294,6 +1320,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1325,7 +1352,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -1378,7 +1405,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -1431,8 +1458,9 @@ Object {
 
 exports[`page.* events page.tag.attached event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -1441,11 +1469,12 @@ Object {
 
 exports[`page.* events page.tag.attached event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.tag.attached",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -1455,6 +1484,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1486,7 +1516,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -1519,7 +1549,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -1529,6 +1559,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1560,7 +1591,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -1584,7 +1615,7 @@ Object {
         "twitter_image": null,
         "twitter_title": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": "http://127.0.0.1:2369/404/",
+        "url": "http://127.0.0.1:2369/tag/blogs/",
         "visibility": "public",
       },
       "published_at": null,
@@ -1612,7 +1643,7 @@ Object {
           "twitter_image": null,
           "twitter_title": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": "http://127.0.0.1:2369/404/",
+          "url": "http://127.0.0.1:2369/tag/blogs/",
           "visibility": "public",
         },
       ],
@@ -1659,7 +1690,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -1710,8 +1741,9 @@ Object {
 
 exports[`page.* events page.tag.detached event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -1720,11 +1752,12 @@ Object {
 
 exports[`page.* events page.tag.detached event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.tag.detached",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -1734,6 +1767,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1765,7 +1799,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -1798,7 +1832,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -1808,6 +1842,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1839,7 +1874,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -1892,7 +1927,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -1918,7 +1953,7 @@ Object {
           "twitter_image": null,
           "twitter_title": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": "http://127.0.0.1:2369/404/",
+          "url": "http://127.0.0.1:2369/tag/testing-tags/",
           "visibility": "public",
         },
       ],
@@ -1929,8 +1964,9 @@ Object {
 
 exports[`page.* events page.unpublished event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -1939,11 +1975,12 @@ Object {
 
 exports[`page.* events page.unpublished event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.unpublished",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -1953,6 +1990,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -1984,7 +2022,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -2017,7 +2055,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -2027,6 +2065,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -2058,7 +2097,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -2111,7 +2150,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },
@@ -2163,8 +2202,9 @@ Object {
 
 exports[`page.* events page.unscheduled event is triggered 1: [headers] 1`] = `
 Object {
-  "accept-encoding": "gzip, deflate, br",
-  "content-length": Any<Number>,
+  "accept-encoding": "gzip, deflate, br, zstd",
+  "connection": "close",
+  "content-length": StringMatching /\\\\d\\+/,
   "content-type": "application/json",
   "content-version": StringMatching /v\\\\d\\+\\\\\\.\\\\d\\+/,
   "user-agent": StringMatching /Ghost\\\\/\\\\d\\+\\\\\\.\\\\d\\+\\(\\?:-\\(\\[0-9A-Za-z-\\]\\+\\(\\?:\\\\\\.\\[0-9A-Za-z-\\]\\+\\)\\*\\)\\)\\?\\\\s\\\\\\(https:\\\\/\\\\/github\\.com\\\\/TryGhost\\\\/Ghost\\\\\\)/,
@@ -2173,11 +2213,12 @@ Object {
 
 exports[`page.* events page.unscheduled event is triggered 2: [body] 1`] = `
 Object {
+  "event": "page.unscheduled",
   "page": Object {
     "current": Object {
       "authors": Array [
         Object {
-          "accessibility": null,
+          "accessibility": "{\\"nightShift\\":\\"system\\"}",
           "bio": "bio",
           "bluesky": null,
           "comment_notifications": true,
@@ -2187,6 +2228,7 @@ Object {
           "email": "jbloggs@example.com",
           "facebook": null,
           "free_member_signup_notification": true,
+          "gift_subscription_notifications": true,
           "id": "5951f5fc0000000000000000",
           "instagram": null,
           "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -2218,7 +2260,7 @@ Object {
           "tour": null,
           "twitter": null,
           "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+          "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
           "website": null,
           "youtube": null,
         },
@@ -2251,7 +2293,7 @@ Object {
       "og_title": null,
       "post_revisions": Any<Array>,
       "primary_author": Object {
-        "accessibility": null,
+        "accessibility": "{\\"nightShift\\":\\"system\\"}",
         "bio": "bio",
         "bluesky": null,
         "comment_notifications": true,
@@ -2261,6 +2303,7 @@ Object {
         "email": "jbloggs@example.com",
         "facebook": null,
         "free_member_signup_notification": true,
+        "gift_subscription_notifications": true,
         "id": "5951f5fc0000000000000000",
         "instagram": null,
         "last_seen": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
@@ -2292,7 +2335,7 @@ Object {
         "tour": null,
         "twitter": null,
         "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+        "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
         "website": null,
         "youtube": null,
       },
@@ -2345,7 +2388,7 @@ Object {
       "twitter_image": null,
       "twitter_title": null,
       "updated_at": StringMatching /\\\\d\\{4\\}-\\\\d\\{2\\}-\\\\d\\{2\\}T\\\\d\\{2\\}:\\\\d\\{2\\}:\\\\d\\{2\\}\\\\\\.000Z/,
-      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:2369\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
+      "url": StringMatching /http:\\\\/\\\\/127\\.0\\.0\\.1:\\\\d\\+\\\\/\\[A-Za-z0-9_-\\]\\+\\\\//,
       "uuid": StringMatching /\\[a-f0-9\\]\\{8\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{4\\}-\\[a-f0-9\\]\\{12\\}/,
       "visibility": "public",
     },

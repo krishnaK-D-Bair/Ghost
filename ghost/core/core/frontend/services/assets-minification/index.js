@@ -1,9 +1,18 @@
-const CardAssets = require('./CardAssets');
-const AdminAuthAssets = require('./AdminAuthAssets');
-const cardAssets = new CardAssets();
-const adminAuthAssets = new AdminAuthAssets();
+const CardAssets = require('./card-assets');
+const AdminAuthAssets = require('./admin-auth-assets');
 
+let cardAssets;
+let adminAuthAssets;
+
+// Instantiated lazily: the AdminAuthAssets constructor touches the filesystem,
+// and consumers that only want cardAssets shouldn't trigger that
 module.exports = {
-    cardAssets,
-    adminAuthAssets
+  get cardAssets() {
+    cardAssets = cardAssets || new CardAssets();
+    return cardAssets;
+  },
+  get adminAuthAssets() {
+    adminAuthAssets = adminAuthAssets || new AdminAuthAssets();
+    return adminAuthAssets;
+  },
 };

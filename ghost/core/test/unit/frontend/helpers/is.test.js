@@ -1,69 +1,68 @@
-const assert = require('node:assert/strict');
 const sinon = require('sinon');
 const is = require('../../../../core/frontend/helpers/is');
 const logging = require('@tryghost/logging');
 
 describe('{{#is}} helper', function () {
-    afterEach(function () {
-        sinon.restore();
+  afterEach(function () {
+    sinon.restore();
+  });
+
+  // All positive tests
+  it('should match single context "index"', function () {
+    const fn = sinon.spy();
+    const inverse = sinon.spy();
+
+    is.call({}, 'index', {
+      fn: fn,
+      inverse: inverse,
+      data: { root: { context: ['home', 'index'] } },
     });
 
-    // All positive tests
-    it('should match single context "index"', function () {
-        const fn = sinon.spy();
-        const inverse = sinon.spy();
+    sinon.assert.called(fn);
+    sinon.assert.notCalled(inverse);
+  });
 
-        is.call(
-            {},
-            'index',
-            {fn: fn, inverse: inverse, data: {root: {context: ['home', 'index']}}}
-        );
+  it('should match OR context "index, paged"', function () {
+    const fn = sinon.spy();
+    const inverse = sinon.spy();
 
-        assert.equal(fn.called, true);
-        assert.equal(inverse.called, false);
+    is.call({}, 'index, paged', {
+      fn: fn,
+      inverse: inverse,
+      data: { root: { context: ['tag', 'paged'] } },
     });
 
-    it('should match OR context "index, paged"', function () {
-        const fn = sinon.spy();
-        const inverse = sinon.spy();
+    sinon.assert.called(fn);
+    sinon.assert.notCalled(inverse);
+  });
 
-        is.call(
-            {},
-            'index, paged',
-            {fn: fn, inverse: inverse, data: {root: {context: ['tag', 'paged']}}}
-        );
+  it('should not match "paged"', function () {
+    const fn = sinon.spy();
+    const inverse = sinon.spy();
 
-        assert.equal(fn.called, true);
-        assert.equal(inverse.called, false);
+    is.call({}, 'paged', {
+      fn: fn,
+      inverse: inverse,
+      data: { root: { context: ['index', 'home'] } },
     });
 
-    it('should not match "paged"', function () {
-        const fn = sinon.spy();
-        const inverse = sinon.spy();
+    sinon.assert.notCalled(fn);
+    sinon.assert.called(inverse);
+  });
 
-        is.call(
-            {},
-            'paged',
-            {fn: fn, inverse: inverse, data: {root: {context: ['index', 'home']}}}
-        );
+  it('should log warning with no args', function () {
+    const fn = sinon.spy();
+    const inverse = sinon.spy();
+    const logWarn = sinon.stub(logging, 'warn');
 
-        assert.equal(fn.called, false);
-        assert.equal(inverse.called, true);
+    is.call({}, undefined, {
+      fn: fn,
+      inverse: inverse,
+      data: { root: { context: ['index', 'home'] } },
     });
 
-    it('should log warning with no args', function () {
-        const fn = sinon.spy();
-        const inverse = sinon.spy();
-        const logWarn = sinon.stub(logging, 'warn');
-
-        is.call(
-            {},
-            undefined,
-            {fn: fn, inverse: inverse, data: {root: {context: ['index', 'home']}}}
-        );
-
-        assert.equal(logWarn.called, true);
-        assert.equal(fn.called, false);
-        assert.equal(inverse.called, false);
-    });
+    sinon.assert.called(logWarn);
+    sinon.assert.notCalled(fn);
+    sinon.assert.notCalled(inverse);
+  });
 });

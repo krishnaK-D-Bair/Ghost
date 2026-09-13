@@ -1,14 +1,14 @@
-const {ValidationError} = require('@tryghost/errors');
+const { ValidationError } = require('@tryghost/errors');
 
 class InvalidPropError extends ValidationError {
-    /** @param {any} options */
-    constructor(options) {
-        super({
-            statusCode: 400,
-            ...options
-        });
-        this.errorType = this.constructor.name;
-    }
+  /** @param {any} options */
+  constructor(options) {
+    super({
+      statusCode: 400,
+      ...options,
+    });
+    this.errorType = this.constructor.name;
+  }
 }
 
 class InvalidOfferName extends InvalidPropError {}
@@ -18,25 +18,31 @@ class InvalidOfferCode extends InvalidPropError {}
 class InvalidOfferType extends InvalidPropError {}
 class InvalidOfferAmount extends InvalidPropError {}
 class InvalidOfferCurrency extends InvalidPropError {}
+class InvalidOfferTier extends InvalidPropError {}
 class InvalidOfferTierName extends InvalidPropError {}
 class InvalidOfferCadence extends InvalidPropError {}
 class InvalidOfferDuration extends InvalidPropError {}
 class InvalidOfferCoupon extends InvalidPropError {}
 class InvalidOfferStatus extends InvalidPropError {}
+class InvalidOfferRedemptionType extends InvalidPropError {}
 class InvalidStripeCoupon extends InvalidPropError {}
+class InvalidOfferRedemptionCount extends InvalidPropError {}
 
 module.exports = {
-    InvalidOfferName,
-    InvalidOfferTitle,
-    InvalidOfferDescription,
-    InvalidOfferCode,
-    InvalidOfferType,
-    InvalidOfferAmount,
-    InvalidOfferCurrency,
-    InvalidOfferCadence,
-    InvalidOfferDuration,
-    InvalidOfferTierName,
-    InvalidOfferCoupon,
-    InvalidOfferStatus,
-    InvalidStripeCoupon
+  InvalidOfferName,
+  InvalidOfferTitle,
+  InvalidOfferDescription,
+  InvalidOfferCode,
+  InvalidOfferType,
+  InvalidOfferAmount,
+  InvalidOfferCurrency,
+  InvalidOfferCadence,
+  InvalidOfferDuration,
+  InvalidOfferTier,
+  InvalidOfferTierName,
+  InvalidOfferCoupon,
+  InvalidOfferStatus,
+  InvalidOfferRedemptionType,
+  InvalidStripeCoupon,
+  InvalidOfferRedemptionCount,
 };

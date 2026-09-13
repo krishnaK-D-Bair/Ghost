@@ -1,49 +1,56 @@
-const models = require('../../../../core/server/models');
-const should = require('should');
+const { SingleUseToken } = require('../../../../core/server/models/single-use-token');
 const sinon = require('sinon');
-const assert = require('assert/strict');
+const assert = require('node:assert/strict');
+const { assertExists } = require('../../../utils/assertions');
 const validator = require('validator');
 
 let clock;
 let sandbox;
 
 describe('Unit: models/single-use-token', function () {
-    before(function () {
-        models.init();
-        sandbox = sinon.createSandbox();
-        clock = sandbox.useFakeTimers();
+  beforeAll(function () {
+    sandbox = sinon.createSandbox();
+    clock = sandbox.useFakeTimers();
+  });
+
+  afterAll(function () {
+    clock.restore();
+    sandbox.restore();
+  });
+
+  describe('fn: defaults', function () {
+    it('Defaults to used_count of zero', async function () {
+      const model = new SingleUseToken();
+      const defaults = model.defaults();
+      assert.equal(defaults.used_count, 0);
     });
 
-    after(function () {
-        clock.restore();
-        sandbox.restore();
+    it('Generates a valid v4 UUID by default', async function () {
+      const model = new SingleUseToken();
+      const defaults = model.defaults();
+
+      assertExists(defaults.uuid);
+      assert.equal(
+        validator.isUUID(defaults.uuid, 4),
+        true,
+        'Generated UUID should be a valid v4 UUID',
+      );
     });
 
-    describe('fn: defaults', function () {
-        it('Defaults to used_count of zero', async function () {
-            const model = new models.SingleUseToken();
-            const defaults = model.defaults();
-            assert.equal(defaults.used_count, 0);
-        });
+    it('Generates unique UUIDs for different instances', async function () {
+      const model1 = new SingleUseToken();
+      const model2 = new SingleUseToken();
 
-        it('Generates a valid v4 UUID by default', async function () {
-            const model = new models.SingleUseToken();
-            const defaults = model.defaults();
-            
-            should.exist(defaults.uuid);
-            assert.equal(validator.isUUID(defaults.uuid, 4), true, 'Generated UUID should be a valid v4 UUID');
-        });
+      const defaults1 = model1.defaults();
+      const defaults2 = model2.defaults();
 
-        it('Generates unique UUIDs for different instances', async function () {
-            const model1 = new models.SingleUseToken();
-            const model2 = new models.SingleUseToken();
-            
-            const defaults1 = model1.defaults();
-            const defaults2 = model2.defaults();
-            
-            should.exist(defaults1.uuid);
-            should.exist(defaults2.uuid);
-            assert.notEqual(defaults1.uuid, defaults2.uuid, 'Each instance should generate a unique UUID');
-        });
+      assertExists(defaults1.uuid);
+      assertExists(defaults2.uuid);
+      assert.notEqual(
+        defaults1.uuid,
+        defaults2.uuid,
+        'Each instance should generate a unique UUID',
+      );
     });
+  });
 });

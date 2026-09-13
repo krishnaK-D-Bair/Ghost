@@ -1,95 +1,63 @@
-const sinon = require('sinon');
-const models = require('../../../../core/server/models');
-const testUtils = require('../../../utils');
+const assert = require('node:assert/strict');
+const { Comment } = require('../../../../core/server/models/comment');
 
 describe('Unit: models/comment', function () {
-    before(function () {
-        models.init();
+  describe('defaultRelations', function () {
+    it('includes member dislike state but not public dislike counts by default', function () {
+      const options = {};
+
+      Comment.defaultRelations('findPage', options);
+
+      assert.ok(options.withRelated.includes('count.likes'));
+      assert.ok(!options.withRelated.includes('count.dislikes'));
+      assert.ok(options.withRelated.includes('count.disliked'));
+      assert.ok(options.withRelated.includes('count.net_score'));
     });
 
-    afterEach(function () {
-        sinon.restore();
+    it('includes dislike count relations for admin requests', function () {
+      const options = {
+        isAdmin: true,
+      };
+
+      Comment.defaultRelations('findPage', options);
+
+      assert.ok(options.withRelated.includes('count.likes'));
+      assert.ok(options.withRelated.includes('count.dislikes'));
+      assert.ok(options.withRelated.includes('count.disliked'));
+      assert.ok(options.withRelated.includes('count.net_score'));
     });
 
-    describe('permissible', function () {
-        function getCommentModel(id, memberId) {
-            const obj = {
-                id: id,
-                member_id: memberId
-            };
+    it('scopes non-page reply tombstone filtering to the loaded comment', function () {
+      const options = {
+        id: 'root-comment-id',
+      };
 
-            return {
-                id: obj.id,
-                get: sinon.stub().callsFake((prop) => {
-                    return obj[prop];
-                })
-            };
-        }
+      Comment.defaultRelations('findOne', options);
 
-        it('user can do all', async function () {
-            const comment = getCommentModel(1, 'member_123');
-            const context = {user: 1};
+      const repliesRelation = options.withRelated.find((relation) => {
+        return typeof relation === 'object' && relation.replies;
+      });
+      let query;
+      const qb = {
+        whereIn(_column, rawQuery) {
+          query = rawQuery.toSQL();
+        },
+      };
 
-            const response = await models.Comment.permissible(comment, 'destroy', context, {}, testUtils.permissions.owner, true, true, true);
-            response.should.eql(true);
-        });
+      repliesRelation.replies(qb);
 
-        it('can only edit own comments', async function () {
-            const comment = getCommentModel(1, 'member_123');
-            const context = {
-                member: {
-                    id: 'other_member'
-                }
-            };
-
-            try {
-                const response = await models.Comment.permissible(comment, 'edit', context, {}, null, false, true, true);
-                response.should.eql(true);
-            } catch (err) {
-                err.message.should.eql('You may only edit your own comments');
-                return;
-            }
-            throw new Error('Should throw');
-        });
-
-        it('can edit own comments', async function () {
-            const comment = getCommentModel(1, 'member_123');
-            const context = {
-                member: {
-                    id: 'member_123'
-                }
-            };
-
-            await models.Comment.permissible(comment, 'edit', context, {}, null, false, true, true);
-        });
-
-        it('can only destroy own comments', async function () {
-            const comment = getCommentModel(1, 'member_123');
-            const context = {
-                member: {
-                    id: 'other_member'
-                }
-            };
-
-            try {
-                const response = await models.Comment.permissible(comment, 'destroy', context, {}, null, false, true, true);
-                response.should.eql(true);
-            } catch (err) {
-                err.message.should.eql('You may only delete your own comments');
-                return;
-            }
-            throw new Error('Should throw');
-        });
-
-        it('can edit destroy comments', async function () {
-            const comment = getCommentModel(1, 'member_123');
-            const context = {
-                member: {
-                    id: 'member_123'
-                }
-            };
-
-            await models.Comment.permissible(comment, 'destroy', context, {}, null, false, true, true);
-        });
+      assert.match(query.sql, /comments\.parent_id IN \(\?\)/);
+      assert.equal(query.bindings.filter((binding) => binding === 'root-comment-id').length, 2);
     });
+  });
+
+  describe('orderAttributes', function () {
+    it('does not expose dislike count ordering directly', function () {
+      const attributes = Comment.forge().orderAttributes();
+
+      assert.ok(attributes.includes('count__likes'));
+      assert.ok(attributes.includes('count__net_score'));
+      assert.ok(!attributes.includes('count__dislikes'));
+    });
+  });
 });

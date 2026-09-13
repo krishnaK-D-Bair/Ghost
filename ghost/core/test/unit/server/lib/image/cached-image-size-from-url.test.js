@@ -1,117 +1,185 @@
+const assert = require('node:assert/strict');
+const { assertExists } = require('../../../../utils/assertions');
 const errors = require('@tryghost/errors');
-const should = require('should');
 const sinon = require('sinon');
-const CachedImageSizeFromUrl = require('../../../../../core/server/lib/image/CachedImageSizeFromUrl');
+const CachedImageSizeFromUrl = require('../../../../../core/server/lib/image/cached-image-size-from-url');
 const InMemoryCache = require('../../../../../core/server/adapters/cache/MemoryCache');
 const logging = require('@tryghost/logging');
 
 describe('lib/image: image size cache', function () {
-    let sizeOfStub;
+  let sizeOfStub;
 
-    beforeEach(function () {
-        sizeOfStub = sinon.stub();
+  beforeEach(function () {
+    sizeOfStub = sinon.stub();
+  });
+
+  afterEach(function () {
+    sinon.restore();
+  });
+
+  it('should read from cache, if dimensions for image are fetched already', async function () {
+    const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
+    let imageSizeSpy;
+
+    sizeOfStub.resolves({
+      width: 50,
+      height: 50,
+      type: 'jpg',
     });
 
-    afterEach(function () {
-        sinon.restore();
+    const cacheStore = new InMemoryCache();
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      getImageSizeFromUrl: sizeOfStub,
+      cache: cacheStore,
     });
 
-    it('should read from cache, if dimensions for image are fetched already', async function () {
-        const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
-        let imageSizeSpy;
+    imageSizeSpy = sizeOfStub;
 
-        sizeOfStub.resolves({
-            width: 50,
-            height: 50,
-            type: 'jpg'
-        });
+    await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
 
-        const cacheStore = new InMemoryCache();
-        const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
-            getImageSizeFromUrl: sizeOfStub,
-            cache: cacheStore
-        });
+    // first call to get result from `getImageSizeFromUrl`
 
-        imageSizeSpy = sizeOfStub;
+    assertExists(cacheStore);
+    assertExists(cacheStore.get(url));
+    const image = cacheStore.get(url);
+    assertExists(image.width);
+    assert.equal(image.width, 50);
+    assertExists(image.height);
+    assert.equal(image.height, 50);
 
-        await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    // second call to check if values get returned from cache
+    await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
 
-        // first call to get result from `getImageSizeFromUrl`
+    sinon.assert.calledOnce(imageSizeSpy);
+    assert.equal(imageSizeSpy.calledTwice, false);
 
-        should.exist(cacheStore);
-        cacheStore.get(url).should.not.be.undefined;
-        const image = cacheStore.get(url);
-        should.exist(image.width);
-        image.width.should.be.equal(50);
-        should.exist(image.height);
-        image.height.should.be.equal(50);
+    assertExists(cacheStore.get(url));
+    const image2 = cacheStore.get(url);
+    assertExists(image2.width);
+    assert.equal(image2.width, 50);
+    assertExists(image2.height);
+    assert.equal(image2.height, 50);
+  });
 
-        // second call to check if values get returned from cache
-        await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+  it('should not cache transient errors, allowing retry on next call', async function () {
+    const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
 
-        imageSizeSpy.calledOnce.should.be.true();
-        imageSizeSpy.calledTwice.should.be.false();
+    sizeOfStub.rejects('error');
 
-        cacheStore.get(url).should.not.be.undefined;
-        const image2 = cacheStore.get(url);
-        should.exist(image2.width);
-        image2.width.should.be.equal(50);
-        should.exist(image2.height);
-        image2.height.should.be.equal(50);
+    const cacheStore = new InMemoryCache();
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      getImageSizeFromUrl: sizeOfStub,
+      cache: cacheStore,
     });
 
-    it('can handle generic image-size errors', async function () {
-        const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
+    const loggingStub = sinon.stub(logging, 'error');
+    const result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
 
-        sizeOfStub.rejects('error');
+    assert.equal(result, null);
 
-        const cacheStore = new InMemoryCache();
-        const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
-            getImageSizeFromUrl: sizeOfStub,
-            cache: cacheStore
-        });
+    // Transient errors should NOT be cached
+    assert.equal(cacheStore.get(url), undefined);
+    sinon.assert.calledOnce(loggingStub);
+    sinon.assert.calledOnce(sizeOfStub);
 
-        const loggingStub = sinon.stub(logging, 'error');
-        await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    // Second call should retry the fetch since nothing was cached
+    const result2 = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
 
-        cacheStore.get(url).should.not.be.undefined;
-        const image = cacheStore.get(url);
-        should.equal(image.url, 'http://mysite.com/content/image/mypostcoverimage.jpg');
-        should.not.exist(image.width);
-        should.not.exist(image.height);
-        sinon.assert.calledOnce(loggingStub);
+    assert.equal(result2, null);
+
+    // Cache should still be empty after the second transient error
+    assert.equal(cacheStore.get(url), undefined);
+    sinon.assert.calledTwice(sizeOfStub);
+  });
+
+  it('should cache NotFoundError permanently and not refetch on subsequent calls', async function () {
+    const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
+
+    sizeOfStub.rejects(new errors.NotFoundError('it iz gone mate!'));
+
+    const cacheStore = new InMemoryCache();
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      getImageSizeFromUrl: sizeOfStub,
+      cache: cacheStore,
     });
 
-    it('can handle NotFoundError error', async function () {
-        const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
+    const result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    assert.equal(result, null);
 
-        sizeOfStub.rejects(new errors.NotFoundError('it iz gone mate!'));
+    // Verify 404 was cached with notFound marker
+    assertExists(cacheStore.get(url));
+    const image = cacheStore.get(url);
+    assert.equal(image.url, url);
+    assert.equal(image.notFound, true);
 
-        const cacheStore = new InMemoryCache();
-        const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
-            getImageSizeFromUrl: sizeOfStub,
-            cache: cacheStore
-        });
+    // Second call should NOT refetch — 404 is permanent
+    const secondResult = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    assert.equal(secondResult, null);
+    sinon.assert.calledOnce(sizeOfStub);
+  });
 
-        await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+  it('should retry fetch when cache has a stale error entry (no dimensions)', async function () {
+    const url = 'http://mysite.com/content/image/photo.jpg';
 
-        cacheStore.get(url).should.not.be.undefined;
-        const image = cacheStore.get(url);
-        should.equal(image.url, 'http://mysite.com/content/image/mypostcoverimage.jpg');
-        should.not.exist(image.width);
-        should.not.exist(image.height);
+    sizeOfStub.resolves({ width: 500, height: 400, type: 'jpg' });
+
+    const cacheStore = new InMemoryCache();
+    // Pre-populate cache with an error entry (no width/height)
+    cacheStore.set(url, { url });
+
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      getImageSizeFromUrl: sizeOfStub,
+      cache: cacheStore,
     });
 
-    it('should return null if url is null', async function () {
-        const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
-            imageSize: {},
-            cache: new InMemoryCache()
-        });
-        const url = null;
-        let result;
+    const result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
 
-        result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    assert.equal(result.width, 500);
+    assert.equal(result.height, 400);
+    sinon.assert.calledOnce(sizeOfStub);
 
-        should.not.exist(result);
+    // Verify cache was overwritten with valid dimensions
+    const cached = cacheStore.get(url);
+    assert.equal(cached.width, 500);
+    assert.equal(cached.height, 400);
+  });
+
+  it('should not corrupt cache when caller mutates the returned object', async function () {
+    const url = 'http://mysite.com/content/image/mypostcoverimage.jpg';
+
+    sizeOfStub.resolves({ width: 2000, height: 1000, type: 'jpg' });
+
+    const cacheStore = new InMemoryCache();
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      getImageSizeFromUrl: sizeOfStub,
+      cache: cacheStore,
     });
+
+    const result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    result.width = 1200;
+    result.height = 600;
+
+    // Cache should still hold the original dimensions
+    const cached = cacheStore.get(url);
+    assert.equal(cached.width, 2000);
+    assert.equal(cached.height, 1000);
+
+    // A subsequent call should also return original dimensions
+    const secondResult = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+    assert.equal(secondResult.width, 2000);
+    assert.equal(secondResult.height, 1000);
+  });
+
+  it('should return null if url is null', async function () {
+    const cachedImageSizeFromUrl = new CachedImageSizeFromUrl({
+      imageSize: {},
+      cache: new InMemoryCache(),
+    });
+    const url = null;
+    let result;
+
+    result = await cachedImageSizeFromUrl.getCachedImageSizeFromUrl(url);
+
+    assert.equal(result, null);
+  });
 });

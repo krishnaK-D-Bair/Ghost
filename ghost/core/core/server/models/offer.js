@@ -1,16 +1,20 @@
 const ghostBookshelf = require('./base');
 
 const Offer = ghostBookshelf.Model.extend({
-    tableName: 'offers',
+  tableName: 'offers',
 
-    actionsCollectCRUD: true,
-    actionsResourceType: 'offer',
+  actionsCollectCRUD: true,
+  actionsResourceType: 'offer',
 
-    product() {
-        return this.belongsTo('Product', 'product_id', 'id');
-    }
+  defaults: {
+    redemption_type: 'signup',
+  },
+
+  product() {
+    return this.belongsTo('Product', 'product_id', 'id');
+  },
 });
 
 module.exports = {
-    Offer: ghostBookshelf.model('Offer', Offer)
+  Offer: ghostBookshelf.model('Offer', Offer),
 };

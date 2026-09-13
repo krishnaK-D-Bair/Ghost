@@ -1,10 +1,9 @@
-const should = require('should');
+const assert = require('node:assert/strict');
 const _ = require('lodash');
-const yaml = require('js-yaml');
 const crypto = require('crypto');
 const fs = require('fs-extra');
 const path = require('path');
-const {config} = require('../../../../utils/configUtils');
+const { config } = require('../../../../utils/config-utils');
 const schema = require('../../../../../core/server/data/schema/schema');
 const fixtures = require('../../../../../core/server/data/schema/fixtures/fixtures.json');
 const defaultSettings = require('../../../../../core/server/data/schema/default-settings/default-settings.json');
@@ -12,7 +11,10 @@ const defaultSettings = require('../../../../../core/server/data/schema/default-
 // Routes are yaml so we can require the file directly
 const routeSettings = require('../../../../../core/server/services/route-settings');
 routeSettings.init();
-const validateRouteSettings = require('../../../../../core/server/services/route-settings/validate');
+const {
+  parseRouteSettings,
+} = require('../../../../../core/server/services/route-settings/route-settings-parser');
+const parseYaml = require('../../../../../core/server/services/route-settings/yaml-parser');
 
 /**
  * @NOTE
@@ -34,39 +36,73 @@ const validateRouteSettings = require('../../../../../core/server/services/route
  * You have to add a migration script if you've added new settings to populate group/flags column.
  */
 describe('DB version integrity', function () {
-    // Only these variables should need updating
-    const currentSchemaHash = '840147221764a9de1b3807e3abb61df2';
-    const currentFixturesHash = 'c583f33910bb84a70847303b323be2db';
-    const currentSettingsHash = 'bb8be7d83407f2b4fa2ad68c19610579';
-    const currentRoutesHash = '3d180d52c663d173a6be791ef411ed01';
+  // Only these variables should need updating
+  const currentSchemaHash = 'f8167b5e21aac21f007f008e6e60a332';
+  const currentFixturesHash = '5718e0d4eb037f159c312369e949829a';
+  const currentSettingsHash = '6ea42a00cca61a1ba87f66eb6e25a78a';
+  const currentRoutesHash = 'd8c25fa01bf6d22a2bcb05ba0de70dc1';
 
-    // If this test is failing, then it is likely a change has been made that requires a DB version bump,
-    // and the values above will need updating as confirmation
-    it('should not change without fixing this test', function () {
-        const routesPath = path.join(config.get('paths').defaultRouteSettings, 'default-routes.yaml');
-        const defaultRoutes = validateRouteSettings(yaml.load(fs.readFileSync(routesPath, 'utf-8')));
+  // If this test is failing, then it is likely a change has been made that requires a DB version bump,
+  // and the values above will need updating as confirmation
+  it('should not change without fixing this test', function () {
+    const routesPath = path.join(config.get('paths').defaultRouteSettings, 'default-routes.yaml');
+    const defaultRoutesSource = fs.readFileSync(routesPath, 'utf-8');
+    // `yamlSource` is the verbatim file text, so hashing it would trip this
+    // canary on comment and whitespace edits that change no route at all.
+    // The bridge output this used to hash carried no such field either.
+    const defaultRoutes = _.omit(
+      parseRouteSettings(parseYaml(defaultRoutesSource), defaultRoutesSource),
+      'yamlSource',
+    );
 
-        const tablesNoValidation = _.cloneDeep(schema);
-        let schemaHash;
-        let fixturesHash;
-        let settingsHash;
-        let routesHash;
+    const tablesNoValidation = _.cloneDeep(schema);
+    let schemaHash;
+    let fixturesHash;
+    let settingsHash;
+    let routesHash;
 
-        _.each(tablesNoValidation, function (table) {
-            return _.each(table, function (column, name) {
-                table[name] = _.omit(column, 'validations');
-            });
-        });
-
-        schemaHash = crypto.createHash('md5').update(JSON.stringify(tablesNoValidation), 'binary').digest('hex');
-        fixturesHash = crypto.createHash('md5').update(JSON.stringify(fixtures), 'binary').digest('hex');
-        settingsHash = crypto.createHash('md5').update(JSON.stringify(defaultSettings), 'binary').digest('hex');
-        routesHash = crypto.createHash('md5').update(JSON.stringify(defaultRoutes), 'binary').digest('hex');
-
-        schemaHash.should.eql(currentSchemaHash, 'Database schema has changed, please ensure a proper migration has been created if necessary and update the hash in this test.');
-        fixturesHash.should.eql(currentFixturesHash, 'Fixtures have changed, please ensure a proper migration has been created if necessary and update the hash in this test.');
-        settingsHash.should.eql(currentSettingsHash, 'Default settings have changed, please ensure a proper migration has been created if necessary and update the hash in this test.');
-        routesHash.should.eql(currentRoutesHash, 'Default routes have changed, please ensure a proper migration has been created if necessary and update the hash in this test.');
-        routesHash.should.eql(routeSettings.getDefaultHash());
+    _.each(tablesNoValidation, function (table) {
+      return _.each(table, function (column, name) {
+        table[name] = _.omit(column, 'validations');
+      });
     });
+
+    schemaHash = crypto
+      .createHash('md5')
+      .update(JSON.stringify(tablesNoValidation), 'binary')
+      .digest('hex');
+    fixturesHash = crypto
+      .createHash('md5')
+      .update(JSON.stringify(fixtures), 'binary')
+      .digest('hex');
+    settingsHash = crypto
+      .createHash('md5')
+      .update(JSON.stringify(defaultSettings), 'binary')
+      .digest('hex');
+    routesHash = crypto
+      .createHash('md5')
+      .update(JSON.stringify(defaultRoutes), 'binary')
+      .digest('hex');
+
+    assert.equal(
+      schemaHash,
+      currentSchemaHash,
+      'Database schema has changed, please ensure a proper migration has been created if necessary and update the hash in this test.',
+    );
+    assert.equal(
+      fixturesHash,
+      currentFixturesHash,
+      'Fixtures have changed, please ensure a proper migration has been created if necessary and update the hash in this test.',
+    );
+    assert.equal(
+      settingsHash,
+      currentSettingsHash,
+      'Default settings have changed, please ensure a proper migration has been created if necessary and update the hash in this test.',
+    );
+    assert.equal(
+      routesHash,
+      currentRoutesHash,
+      'Default routes have changed, please ensure a proper migration has been created if necessary and update the hash in this test.',
+    );
+  });
 });

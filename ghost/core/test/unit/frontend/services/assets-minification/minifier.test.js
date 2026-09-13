@@ -1,160 +1,179 @@
-const should = require('should');
+const assert = require('node:assert/strict');
+const { assertExists } = require('../../../../utils/assertions');
 
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
-const Minifier = require('../../../../../core/frontend/services/assets-minification/Minifier');
+const Minifier = require('../../../../../core/frontend/services/assets-minification/minifier');
+
+// minifier.getMatchingFiles() returns paths relative to process.cwd(); build
+// the expected paths the same way so assertions do not assume the test runs
+// with process.cwd() === ghost/core (the unified `pnpm test:watch` runs from
+// the repo root).
+const expectedFixturePath = (file) =>
+  path.relative(process.cwd(), path.join(__dirname, 'fixtures', 'basic-cards', 'css', file));
 
 describe('Minifier', function () {
-    let minifier;
-    let testDir;
+  let minifier;
+  let testDir;
 
-    before(async function () {
-        testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'minifier-tests-'));
+  beforeAll(async function () {
+    testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'minifier-tests-'));
 
-        minifier = new Minifier({
-            src: path.join(__dirname, 'fixtures', 'basic-cards'),
-            dest: testDir
-        });
+    minifier = new Minifier({
+      src: path.join(__dirname, 'fixtures', 'basic-cards'),
+      dest: testDir,
+    });
+  });
+
+  afterAll(async function () {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  describe('getMatchingFiles expands globs correctly', function () {
+    it('star glob e.g. css/*.css', async function () {
+      let result = await minifier.getMatchingFiles('css/*.css');
+
+      assert(Array.isArray(result));
+      assert.equal(result.length, 3);
+      assert.equal(result[0], expectedFixturePath('bookmark.css'));
+      assert.equal(result[1], expectedFixturePath('empty.css'));
+      assert.equal(result[2], expectedFixturePath('gallery.css'));
     });
 
-    after(async function () {
-        await fs.rmdir(testDir, {recursive: true});
+    it('match glob range e.g. css/bookmark.css and css/empty.css (css/@(bookmark|empty).css)', async function () {
+      let result = await minifier.getMatchingFiles('css/@(bookmark|empty).css');
+
+      assert(Array.isArray(result));
+      assert.equal(result.length, 2);
+      assert.equal(result[0], expectedFixturePath('bookmark.css'));
+      assert.equal(result[1], expectedFixturePath('empty.css'));
     });
 
-    describe('getMatchingFiles expands globs correctly', function () {
-        it('star glob e.g. css/*.css', async function () {
-            let result = await minifier.getMatchingFiles('css/*.css');
+    it('reverse match glob e.g. css/!(bookmark).css', async function () {
+      let result = await minifier.getMatchingFiles('css/!(bookmark).css');
 
-            result.should.be.an.Array().with.lengthOf(3);
-            result[0].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','bookmark.css'));
-            result[1].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','empty.css'));
-            result[2].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','gallery.css'));
-        });
+      assert(Array.isArray(result));
+      assert.equal(result.length, 2);
+      assert.equal(result[0], expectedFixturePath('empty.css'));
+      assert.equal(result[1], expectedFixturePath('gallery.css'));
+    });
+    it('reverse match glob e.g. css/!(bookmark|gallery).css', async function () {
+      let result = await minifier.getMatchingFiles('css/!(bookmark|gallery).css');
 
-        it('match glob range e.g. css/bookmark.css and css/empty.css (css/@(bookmark|empty).css)', async function () {
-            let result = await minifier.getMatchingFiles('css/@(bookmark|empty).css');
+      assert(Array.isArray(result));
+      assert.equal(result.length, 1);
+      assert.equal(result[0], expectedFixturePath('empty.css'));
+    });
+  });
 
-            result.should.be.an.Array().with.lengthOf(2);
-            result[0].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','bookmark.css'));
-            result[1].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','empty.css'));
-        });
-
-        it('reverse match glob e.g. css/!(bookmark).css', async function () {
-            let result = await minifier.getMatchingFiles('css/!(bookmark).css');
-
-            result.should.be.an.Array().with.lengthOf(2);
-            result[0].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','empty.css'));
-            result[1].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','gallery.css'));
-        });
-        it('reverse match glob e.g. css/!(bookmark|gallery).css', async function () {
-            let result = await minifier.getMatchingFiles('css/!(bookmark|gallery).css');
-
-            result.should.be.an.Array().with.lengthOf(1);
-            result[0].should.eql(path.join('test','unit','frontend','services','assets-minification','fixtures','basic-cards','css','empty.css'));
-        });
+  describe('Minify', function () {
+    it('single type, single file', async function () {
+      let result = await minifier.minify({
+        'card.min.js': 'js/*.js',
+      });
+      assert(Array.isArray(result));
+      assert.equal(result.length, 1);
     });
 
-    describe('Minify', function () {
-        it('single type, single file', async function () {
-            let result = await minifier.minify({
-                'card.min.js': 'js/*.js'
-            });
-            result.should.be.an.Array().with.lengthOf(1);
-        });
-
-        it('single type, multi file', async function () {
-            let result = await minifier.minify({
-                'card.min.css': 'css/*.css'
-            });
-            result.should.be.an.Array().with.lengthOf(1);
-        });
-
-        it('both css and js types + multiple files', async function () {
-            let result = await minifier.minify({
-                'card.min.js': 'js/*.js',
-                'card.min.css': 'css/*.css'
-            });
-
-            result.should.be.an.Array().with.lengthOf(2);
-        });
-
-        it('can replace the content', async function () {
-            let result = await minifier.minify({
-                'card.min.js': 'js/*.js'
-            }, {
-                replacements: {
-                    '.kg-gallery-image': 'randomword'
-                }
-            });
-            result.should.be.an.Array().with.lengthOf(1);
-
-            const outputPath = minifier.getFullDest(result[0]);
-            const content = await fs.readFile(outputPath, {encoding: 'utf8'});
-            content.should.match(/randomword/);
-        });
+    it('single type, multi file', async function () {
+      let result = await minifier.minify({
+        'card.min.css': 'css/*.css',
+      });
+      assert(Array.isArray(result));
+      assert.equal(result.length, 1);
     });
 
-    describe('Bad inputs', function () {
-        it('cannot create a minifier without src and dest', function () {
-            (function noObject(){
-                new Minifier();
-            }).should.throw();
+    it('both css and js types + multiple files', async function () {
+      let result = await minifier.minify({
+        'card.min.js': 'js/*.js',
+        'card.min.css': 'css/*.css',
+      });
 
-            (function emptyObject() {
-                new Minifier({});
-            }).should.throw();
-
-            (function missingSrc() {
-                new Minifier({dest: 'a'});
-            }).should.throw();
-
-            (function missingDest() {
-                new Minifier({src: 'a'});
-            }).should.throw();
-        });
-
-        it('can only handle css and js files', async function () {
-            try {
-                await minifier.minify({
-                    'card.min.ts': 'js/*.ts'
-                });
-                should.fail(minifier, 'Should have errored');
-            } catch (err) {
-                should.exist(err);
-                err.errorType.should.eql('IncorrectUsageError');
-                err.message.should.match(/Unexpected destination/);
-            }
-        });
-
-        it('can handle missing files and folders gracefully', async function () {
-            try {
-                await minifier.minify({
-                    'card.min.ts': 'ts/*.ts',
-                    'card.min.js': 'js/fake.js'
-                });
-                should.fail(minifier, 'Should have errored');
-            } catch (err) {
-                should.exist(err);
-                err.errorType.should.eql('IncorrectUsageError');
-                err.message.should.match(/Unable to read/);
-            }
-        });
-
-        it('can minify empty js correctly to no result', async function () {
-            let result = await minifier.minify({
-                'card.min.js': 'js/empty.js'
-            });
-
-            result.should.be.an.Array().with.lengthOf(0);
-        });
-
-        it('can minify empty css correctly to no result', async function () {
-            let result = await minifier.minify({
-                'card.min.css': 'css/empty.css'
-            });
-
-            result.should.be.an.Array().with.lengthOf(0);
-        });
+      assert(Array.isArray(result));
+      assert.equal(result.length, 2);
     });
+
+    it('can replace the content', async function () {
+      let result = await minifier.minify(
+        {
+          'card.min.js': 'js/*.js',
+        },
+        {
+          replacements: {
+            '.kg-gallery-image': 'randomword',
+          },
+        },
+      );
+      assert(Array.isArray(result));
+      assert.equal(result.length, 1);
+
+      const outputPath = minifier.getFullDest(result[0]);
+      const content = await fs.readFile(outputPath, { encoding: 'utf8' });
+      assert.match(content, /randomword/);
+    });
+  });
+
+  describe('Bad inputs', function () {
+    it('cannot create a minifier without src and dest', function () {
+      assert.throws(function noObject() {
+        new Minifier();
+      });
+
+      assert.throws(function emptyObject() {
+        new Minifier({});
+      });
+
+      assert.throws(function missingSrc() {
+        new Minifier({ dest: 'a' });
+      });
+
+      assert.throws(function missingDest() {
+        new Minifier({ src: 'a' });
+      });
+    });
+
+    it('can only handle css and js files', async function () {
+      try {
+        await minifier.minify({
+          'card.min.ts': 'js/*.ts',
+        });
+        assert.fail('Should have errored');
+      } catch (err) {
+        assertExists(err);
+        assert.equal(err.errorType, 'IncorrectUsageError');
+        assert.match(err.message, /Unexpected destination/);
+      }
+    });
+
+    it('can handle missing files and folders gracefully', async function () {
+      try {
+        await minifier.minify({
+          'card.min.ts': 'ts/*.ts',
+          'card.min.js': 'js/fake.js',
+        });
+        assert.fail('Should have errored');
+      } catch (err) {
+        assertExists(err);
+        assert.equal(err.errorType, 'IncorrectUsageError');
+        assert.match(err.message, /Unable to read/);
+      }
+    });
+
+    it('can minify empty js correctly to no result', async function () {
+      let result = await minifier.minify({
+        'card.min.js': 'js/empty.js',
+      });
+
+      assert.deepEqual(result, []);
+    });
+
+    it('can minify empty css correctly to no result', async function () {
+      let result = await minifier.minify({
+        'card.min.css': 'css/empty.css',
+      });
+
+      assert.deepEqual(result, []);
+    });
+  });
 });

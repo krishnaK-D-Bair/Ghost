@@ -5,29 +5,37 @@ Minimal Docker image for running Ghost Core in development with hot-reload suppo
 ## Purpose
 
 This lightweight image:
+
 - Installs only Ghost Core dependencies
 - Mounts source code from the host at runtime
-- Enables `node --watch` for automatic restarts on file changes
+- Enables `nodemon` for automatic restarts on file changes
 - Works with the Caddy gateway to proxy frontend assets from host dev servers
 
 ## Key Differences from Main Dockerfile
 
 **Main `Dockerfile`** (for E2E tests, full builds):
+
 - Builds all frontend apps (Admin, Portal, AdminX apps, etc.)
 - Bundles everything into the image
 - ~15 build stages, 5-10 minute build time
 
 **This `Dockerfile`** (for local development):
+
 - Only installs dependencies
 - No frontend builds or bundling
-- Source code mounted at runtime 
-- Used for: Local development with `yarn dev`
+- Source code mounted at runtime
+- Used for: Local development with `pnpm dev`
 
 ## Usage
 
 This image is used automatically when running:
 
 ```bash
-yarn dev              # Starts Docker + frontend dev servers
-yarn dev:ghost        # Starts only Docker services
+pnpm dev              # Starts Docker backend + Admin/Ember/shared/Portal dev watchers
+pnpm dev:public       # Include all optional public UMD app watchers
+pnpm dev:analytics    # Include Tinybird analytics
+pnpm dev:storage      # Include VersityGW S3-compatible object storage
+pnpm dev:stripe       # Include Stripe webhook forwarding
+pnpm dev:full         # Include analytics, storage, Stripe, and public app watchers
+pnpm dev:all          # Backwards-compatible alias for all optional services
 ```

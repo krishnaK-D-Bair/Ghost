@@ -1,7 +1,7 @@
-import type { ChangelogEntry as ChangelogEntryType } from "@/whats-new/hooks/use-changelog";
+import type { ChangelogEntry as ChangelogEntryType } from '@/whats-new/hooks/use-changelog';
 
 interface ChangelogEntryProps {
-    entry: ChangelogEntryType;
+  entry: ChangelogEntryType;
 }
 
 /**
@@ -9,43 +9,49 @@ interface ChangelogEntryProps {
  * Matches the format used in Ember: {{moment-format entry.published_at "DD MMMM YYYY"}}
  */
 function formatPublishedDate(date: Date): string {
-    return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-    });
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 function ChangelogEntry({ entry }: ChangelogEntryProps) {
-    return (
-        <a
-            className="flex items-start gap-6 p-2 -mx-2 rounded-md hover:bg-muted/80 transition-colors"
-            data-test-entry
-            href={entry.url}
-            rel="noopener noreferrer"
-            target="_blank"
+  return (
+    <a
+      className="-mx-2 flex items-start gap-6 rounded-md p-2 transition-colors hover:bg-muted/80"
+      data-testid="whats-new-entry"
+      href={entry.url}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {entry.featureImage && (
+        <img
+          alt={entry.title}
+          className="h-[110px] w-40 flex-shrink-0 rounded object-cover"
+          data-testid="whats-new-entry-image"
+          src={entry.featureImage}
+        />
+      )}
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <h2
+          className="mt-1.5 text-[17px] font-semibold text-foreground"
+          data-testid="whats-new-entry-title"
         >
-            {entry.featureImage && (
-                <img
-                    alt={entry.title}
-                    className="flex-shrink-0 w-40 h-[110px] object-cover rounded"
-                    data-test-entry-image
-                    src={entry.featureImage}
-                />
-            )}
-            <div className="flex flex-col gap-2 min-w-0 flex-1">
-                <h2 className="text-[17px] font-semibold text-foreground mt-1.5" data-test-entry-title>
-                    {entry.title}
-                </h2>
-                <p className="text-sm text-gray-700 leading-[1.45] line-clamp-2" data-test-entry-excerpt>
-                    {entry.customExcerpt}
-                </p>
-                <span className="text-sm text-gray-600" data-test-entry-date>
-                    {formatPublishedDate(entry.publishedAt)}
-                </span>
-            </div>
-        </a>
-    );
+          {entry.title}
+        </h2>
+        <p
+          className="line-clamp-2 text-sm leading-[1.45] text-gray-700"
+          data-testid="whats-new-entry-excerpt"
+        >
+          {entry.customExcerpt}
+        </p>
+        <span className="text-sm text-gray-600" data-testid="whats-new-entry-date">
+          {formatPublishedDate(entry.publishedAt)}
+        </span>
+      </div>
+    </a>
+  );
 }
 
 export default ChangelogEntry;

@@ -6,9 +6,11 @@
 
 ## Usage
 
-Ghost automatically injects Portal script on all sites running Ghost 4 or higher.
+Ghost automatically injects the Portal script on all sites running Ghost 4 or
+higher.
 
-Alternatively, Portal can be enabled on non-ghost pages directly by inserting the below script on the page.
+Alternatively, Portal can be enabled on pages outside Ghost by adding this
+script:
 
 ```html
 <script defer src="https://unpkg.com/@tryghost/portal@latest/umd/portal.min.js" data-ghost="https://mymemberssite.com"></script>
@@ -20,71 +22,91 @@ The `data-ghost` attribute expects the URL for your Ghost site, which is the onl
 
 By default, the script adds a default floating trigger button on the bottom right of your page which is used to trigger the popup on screen.
 
-Its possible to add custom trigger button of your own by adding data attribute `data-portal` to any HTML tag on page, and also specify a specific [page](https://github.com/TryGhost/Ghost/blob/main/ghost/portal/src/pages.js#L13-L22) to open from it by using it as `data-portal=signup`.
+You can add a custom trigger by adding the `data-portal` attribute to any HTML
+element. Set its value to choose a specific
+[Portal page](https://github.com/TryGhost/Ghost/blob/main/apps/portal/src/pages.js),
+for example `data-portal="signup"`.
 
-The script also adds custom class names to this element for open and close state of popup - `gh-portal-open` and `gh-portal-close`, allowing devs to update its UI based on popup state.
+Share modal can be opened with `data-portal="share"` (or `#/share`).
 
-Refer the [docs](https://ghost.org/help/setup-members/#customize-portal-settings) to read about ways in which Portal can be customized for your site.
+Default (zero-config) usage:
+
+```html
+<button type="button" data-portal="share">Share</button>
+```
+
+On pages where `{{ghost_head}}` is rendered, Portal will auto-resolve metadata from DOM tags:
+
+- URL: canonical URL (or current URL fallback)
+- Title: Open Graph title (or document title fallback)
+- Image: Open Graph image (or Twitter image fallback)
+
+Troubleshooting missing preview metadata:
+
+1. Verify the template includes `{{ghost_head}}`.
+2. Verify rendered HTML contains canonical + OG/Twitter tags.
+
+The script adds `gh-portal-open` and `gh-portal-close` classes to custom triggers
+to reflect the popup state.
+
+See the [Portal settings documentation](https://ghost.org/help/setup-members/#customize-portal-settings)
+for ways to customize Portal for your site.
 
 ## Develop
 
-Run Portal within the Ghost monorepo with:
+Portal runs automatically with Ghost's standard development command from the
+monorepo root:
+
+```bash
+pnpm dev
 ```
-yarn dev --portal
-```
 
-Alternatively, use  `yarn dev --all` to load Portal and other supported apps/services, see [dev.js](https://github.com/TryGhost/Ghost/blob/main/.github/scripts/dev.js) for more information.
-
----
-
-To run Portal in a standalone fashion, use `yarn start` and open [http://localhost:3000](http://localhost:3000).
+This starts Ghost, Admin, and Portal. Portal is served through the development
+gateway at `http://localhost:2368/ghost/assets/portal/portal.min.js` and loaded
+into theme pages on the development site. Use `pnpm dev:public` when changing
+Portal alongside the other public apps.
 
 ## Build
 
-To create a production minified bundle in `umd/portal.min.js`:
-```
-yarn build
+From this directory, create a production minified bundle in
+`umd/portal.min.js` with:
+
+```bash
+pnpm build
 ```
 
 ## Test
 
-To run tests in watch mode:
+From this directory, run unit tests once or in watch mode with:
+
+```bash
+pnpm test
+pnpm test:watch
 ```
-yarn test
+
+### Ghost e2e tests
+
+Portal is primarily tested through Ghost's Playwright tests in the `e2e/`
+directory. Run them from the monorepo root:
+
+```bash
+pnpm test:e2e
 ```
-
-### Ghost e2e browser tests
-
-Portal is primarily tested via Ghost's e2e browser tests, see [our Playwright docs](https://ghost.notion.site/Playwright-Tests-b49ccb6e2b4a40f1a4f8df5261391218) for more details.
-
-1. Run the Ghost e2e tests in the top-level of the monorepo, providing ENV variables for Stripe:
-   ```
-   STRIPE_ACCOUNT_ID=acct_xxx STRIPE_PUBLISHABLE_KEY=pk_test_xxx STRIPE_SECRET_KEY=sk_test_xxx yarn test:browser
-   ```
 
 ## Release
 
-A patch release can be rolled out instantly in production, whereas a minor/major release requires the Ghost monorepo to be updated and released. In either case, you need sufficient permissions to release `@tryghost` packages on NPM.
+Patch releases are automatic. When Portal changes on `main`, CI publishes the next patch version to npm and clears the jsDelivr cache. Sites using that major/minor line receive the patch without a Ghost release.
 
 If you're releasing new code that should not immediately go live _always_ use a minor or major version when publishing.
 
-In order to have Ghost's e2e tests run against the new code on CI or to test the new code in staging, you need to publish to npm following the Minor / major release process below.
+For an intentional minor or major release:
 
-### Patch release
-
-1. Run `yarn ship` and select a patch version when prompted
+1. From a clean branch, run `pnpm ship` and select a minor or major version
 2. Merge the release commit to `main`
+3. Wait for a public Ghost release to ship the new default version line
 
-### Minor / major release
-
-1. Run `yarn ship` and select a minor or major version when prompted
-2. Merge the release commit to `main`
-3. Wait until a new version of Ghost is released
-
-### JsDelivr cache
-If the CI doesn't clear JsDelivr cache to get the new version out instantly, you may want to do it yourself manually ([docs](https://www.notion.so/ghost/How-to-clear-jsDelivr-CDN-cache-2930bdbac02946eca07ac23ab3199bfa?pvs=4)). Typically, you'll need to open `https://purge.jsdelivr.net/ghost/portal@~${PORTAL_VERSION}/umd/portal.min.js` and
-`https://purge.jsdelivr.net/ghost/portal@~${PORTAL_VERSION}/umd/main.css` in your browser, where `PORTAL_VERSION` is the latest minor version in `ghost/core/core/shared/config/defaults.json` ([code](https://github.com/TryGhost/Ghost/blob/0aef3d3beeebcd79a4bfd3ad27e0ac67554b5744/ghost/core/core/shared/config/defaults.json#L185))
+`pnpm ship` updates both the package version and Ghost's default Portal version.
 
 # Copyright & License
 
-Copyright (c) 2013-2025 Ghost Foundation - Released under the [MIT license](LICENSE).
+Copyright (c) 2013-2026 Ghost Foundation - Released under the [MIT license](https://github.com/TryGhost/Ghost/blob/main/LICENSE).
